@@ -1,0 +1,16 @@
+spring:
+  mongodb:
+    embedded:
+      version: "3.5.5"
+  data:
+    mongodb:
+      database: booksdb
+      port: 27017
+
+mongock:
+  runner-type: "InitializingBean"
+  change-logs-scan-package: ru.otus.lesson22.mongock.changelog
+  mongo-db:
+    write-concern:
+      journal: false
+    read-concern: local
