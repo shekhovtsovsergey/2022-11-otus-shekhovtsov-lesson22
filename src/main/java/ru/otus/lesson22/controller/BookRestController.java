@@ -17,6 +17,7 @@ import ru.otus.lesson22.model.Book;
 import ru.otus.lesson22.model.Genre;
 import ru.otus.lesson22.repository.AuthorRepository;
 import ru.otus.lesson22.repository.BookRepository;
+import ru.otus.lesson22.repository.CommentRepository;
 import ru.otus.lesson22.repository.GenreRepository;
 
 @RestController
@@ -27,6 +28,7 @@ public class BookRestController {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
     private final GenreRepository genreRepository;
+    private final CommentRepository commentRepository;
     private final BookConverter bookConverter;
 
     @GetMapping("/api/v1/book")
@@ -37,19 +39,24 @@ public class BookRestController {
 
     @GetMapping("/api/v1/book/{id}")
     public Mono<BookDto> getBookById(@PathVariable(name = "id") String id) {
-        return bookRepository.findById(id).map(bookConverter::entityToDto);
+        return bookRepository
+                .findById(id)
+                .switchIfEmpty(Mono.error(new BookNotFoundException(id)))
+                .map(bookConverter::entityToDto);
     }
 
     @DeleteMapping("/api/v1/book/{id}")
     public Mono<Void> deleteBookById(@PathVariable(name = "id") String id) {
-        return bookRepository.deleteById(id);
+        return bookRepository.deleteById(id).then(commentRepository.deleteByBookId(id));
     }
 
     @PutMapping("/api/v1/book/{id}")
     public Mono<BookDto> updateBook(@RequestBody BookDto bookDto) {
-        Mono<Author> authorMono = authorRepository.findById(bookDto.getAuthor())
+        Mono<Author> authorMono = authorRepository.
+                findById(bookDto.getAuthor())
                 .switchIfEmpty(Mono.error(new AuthorNotFoundException(bookDto.getAuthor())));
-        Mono<Genre> genreMono = genreRepository.findById(bookDto.getGenre())
+        Mono<Genre> genreMono = genreRepository.
+                findById(bookDto.getGenre())
                 .switchIfEmpty(Mono.error(new GenreNotFoundException(bookDto.getGenre())));
         return Mono.zip(authorMono, genreMono)
                 .flatMap(tuple -> {
@@ -61,9 +68,11 @@ public class BookRestController {
 
     @PostMapping("/api/v1/book")
     public Mono<BookDto> createBook(@RequestBody BookDto bookDto) {
-        Mono<Author> authorMono = authorRepository.findById(bookDto.getAuthor())
+        Mono<Author> authorMono = authorRepository
+                .findById(bookDto.getAuthor())
                 .switchIfEmpty(Mono.error(new AuthorNotFoundException(bookDto.getAuthor())));
-        Mono<Genre> genreMono = genreRepository.findById(bookDto.getGenre())
+        Mono<Genre> genreMono = genreRepository.
+                findById(bookDto.getGenre())
                 .switchIfEmpty(Mono.error(new GenreNotFoundException(bookDto.getGenre())));
         return Mono.zip(authorMono, genreMono)
                 .flatMap(tuple -> {
@@ -76,6 +85,6 @@ public class BookRestController {
     @ExceptionHandler({BookNotFoundException.class,AuthorNotFoundException.class,GenreNotFoundException.class})
     private ResponseEntity<String> handleNotFound(Exception e) {
         log.error(e.getMessage());
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.status(404).body(e.getMessage());
     }
 }

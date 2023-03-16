@@ -28,6 +28,13 @@ public class CommentRestController {
     private final CommentConverter commentConverter;
 
 
+    @GetMapping("/api/v1/comment")
+    public Flux<CommentDto> getCommentList() {
+        return commentRepository.findAll()
+                .map(commentConverter::entityToDto);
+    }
+
+
     @GetMapping("/api/v1/book/{id}/comment")
     public Flux<CommentDto> getAllCommentsByBook(@PathVariable(name = "id") String id) throws BookNotFoundException {
         return bookRepository.findById(id)
@@ -36,16 +43,10 @@ public class CommentRestController {
                 .map(commentConverter::entityToDto);
     }
 
-    @GetMapping("/api/v1/comment")
-    public Flux<CommentDto> getCommentList() {
-        return commentRepository.findAll()
-                .map(commentConverter::entityToDto);
-    }
-
 
     @ExceptionHandler({BookNotFoundException.class})
     private ResponseEntity<String> handleNotFound(Exception e) {
         log.error(e.getMessage());
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.status(404).body(e.getMessage());
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
+import java.util.Objects;
 
 @Document(collection = "books")
 @Getter
@@ -35,4 +36,19 @@ public class Book {
                 ", comments=" + comment +
                 '}';
     }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass() && getClass() != o.getClass().getSuperclass()) return false;
+        Book book = (Book) o;
+        return id.equals(book.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id,name,author,genre);
+    }
+
 }

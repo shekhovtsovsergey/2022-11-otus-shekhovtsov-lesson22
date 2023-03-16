@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "authors")
 @Getter
 @Setter
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Author {

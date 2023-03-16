@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "genres")
 @Getter
 @Setter
+@ToString
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class Genre {

@@ -1,7 +1,6 @@
 package ru.otus.lesson22.mongock.changelog;
 
 
-
 import com.github.cloudyrock.mongock.ChangeLog;
 import com.github.cloudyrock.mongock.ChangeSet;
 import com.mongodb.client.MongoDatabase;
@@ -15,7 +14,9 @@ import ru.otus.lesson22.repository.CommentRepository;
 import ru.otus.lesson22.repository.GenreRepository;
 
 import java.util.ArrayList;
-
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @ChangeLog(order = "001")
 public class InitMongoDBDataChangeLog {
@@ -66,27 +67,12 @@ public class InitMongoDBDataChangeLog {
     }
 
     @ChangeSet(order = "004", id = "initComments", author = "shekhovtsov", runAlways = true)
-    public void initComments(CommentRepository repository,BookRepository bookRepository) {
-        Comment commentOne = new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne);
-        repository.save(commentOne).block();
-        bookOne.getComment().add(commentOne);
-
-        Comment commentTwo = new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne);
-        repository.save(commentTwo).block();
-        bookOne.getComment().add(commentTwo);
-
-        Comment commentThree = new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne);
-        repository.save(commentThree).block();
-        bookOne.getComment().add(commentThree);
-
-        Comment commentFour = new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne);
-        repository.save(commentFour).block();
-        bookOne.getComment().add(commentFour);
-
-        Comment commentFive = new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne);
-        repository.save(commentFive).block();
-        bookOne.getComment().add(commentFive);
-
+    public void initComments(CommentRepository commentRepository, BookRepository bookRepository) {
+        List<Comment> comments = IntStream.range(0, 5)
+                .mapToObj(i -> new Comment(null, "shekhovtsov", "habe nichts verstanden", bookOne))
+                .collect(Collectors.toList());
+        commentRepository.saveAll(comments).collectList().block();
+        bookOne.getComment().addAll(comments);
         bookRepository.save(bookOne).block();
     }
 }

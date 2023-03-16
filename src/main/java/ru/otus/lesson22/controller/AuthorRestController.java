@@ -22,5 +22,4 @@ public class AuthorRestController {
         return authorRepository.findAll()
                 .map(authorConverter::entityToDto);
     }
-
 }
