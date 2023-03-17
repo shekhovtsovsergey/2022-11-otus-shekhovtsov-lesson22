@@ -1,4 +1,4 @@
-package ru.otus.lesson22;
+package ru.otus.lesson22.controller;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

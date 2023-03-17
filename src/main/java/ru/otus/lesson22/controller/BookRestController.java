@@ -59,11 +59,9 @@ public class BookRestController {
                 findById(bookDto.getGenre())
                 .switchIfEmpty(Mono.error(new GenreNotFoundException(bookDto.getGenre())));
         return Mono.zip(authorMono, genreMono)
-                .flatMap(tuple -> {
-                    Book book = new Book(bookDto.getId(), bookDto.getName(), tuple.getT1(), tuple.getT2(), null);
-                    return bookRepository.save(book)
-                            .map(bookConverter::entityToDto);
-                });
+                .map(tuple -> new Book(bookDto.getId(), bookDto.getName(), tuple.getT1(), tuple.getT2(), null))
+                .flatMap(bookRepository::save)
+                .map(bookConverter::entityToDto);
     }
 
     @PostMapping("/api/v1/book")
@@ -75,11 +73,9 @@ public class BookRestController {
                 findById(bookDto.getGenre())
                 .switchIfEmpty(Mono.error(new GenreNotFoundException(bookDto.getGenre())));
         return Mono.zip(authorMono, genreMono)
-                .flatMap(tuple -> {
-                    Book book = new Book(null, bookDto.getName(), tuple.getT1(), tuple.getT2(), null);
-                    return bookRepository.save(book)
-                            .map(bookConverter::entityToDto);
-                });
+                .map(tuple -> new Book(null, bookDto.getName(), tuple.getT1(), tuple.getT2(), null))
+                .flatMap(bookRepository::save)
+                .map(bookConverter::entityToDto);
     }
 
     @ExceptionHandler({BookNotFoundException.class,AuthorNotFoundException.class,GenreNotFoundException.class})
